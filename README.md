@@ -1,8 +1,7 @@
 <p align="center">
-  <img src="pro_ifeed/static/img/logograndesf.png" alt="Logo do ProIFEED" width="35%">
 </p>
 
-<h1 align="center">ProIFEED - Sistema Institucional de Feedback Alimentar</h1>
+<h1 align="center">FEED - Sistema Institucional de Feedback Alimentar</h1>
 
 <p align="center">
   Sistema web para avaliação, acompanhamento e gestão da alimentação estudantil do IFRN Campus Canguaretama.
