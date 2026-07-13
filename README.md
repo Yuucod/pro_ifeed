@@ -1,7 +1,7 @@
 <p align="center">
 </p>
 
-<h1 align="center">FEED - Sistema Institucional de Feedback Alimentar</h1>
+<h1 align="center">IFEED - Sistema Institucional de Feedback Alimentar</h1>
 
 <p align="center">
   Sistema web para avaliação, acompanhamento e gestão da alimentação estudantil do IFRN Campus Canguaretama.
