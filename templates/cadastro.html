@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Cadastro - IFEED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'estilos/cadastro.css' %}">{% endblock %}
+{% block content %}
+<main>
+    <section class="cadastro-section">
+        <div class="cadastro-left">
+            <img src="{% static 'img/logograndesf.png' %}" alt="IFEED">
+            <h2>Faça parte do IFEED</h2>
+            <p>
+                Cadastre-se para acessar o sistema de feedback alimentar,
+                acompanhar o cardápio e participar das avaliações estudantis.
+            </p>
+            <div class="cadastro-benefits">
+                <div class="benefit-card"><span>🍽️</span><p>Acesso ao cardápio</p></div>
+                <div class="benefit-card"><span>⭐</span><p>Envie avaliações</p></div>
+                <div class="benefit-card"><span>📢</span><p>Receba avisos do campus</p></div>
+            </div>
+        </div>
+
+        <div class="cadastro-container">
+            <div class="cadastro-box">
+                <h2>Criar Conta</h2>
+                <p>Preencha seus dados para acessar o sistema.</p>
+
+                <form id="cadastroForm" method="post" autocomplete="on">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="form-message error">{{ form.non_field_errors }}</div>
+                    {% endif %}
+
+                    <div class="input-group">
+                        <label for="id_nome">Nome Completo</label>
+                        <input type="text" id="id_nome" name="nome" placeholder="Digite seu nome completo" required autocomplete="name" value="{{ form.nome.value|default:'' }}">
+                        {{ form.nome.errors }}
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="id_matricula">Matrícula</label>
+                            <input type="text" id="id_matricula" name="matricula" inputmode="numeric" maxlength="14" placeholder="20260000000000" required autocomplete="off" value="{{ form.matricula.value|default:'' }}">
+                            {{ form.matricula.errors }}
+                        </div>
+
+                        <div class="input-group">
+                            <label for="id_curso">Curso</label>
+                            <input type="text" id="id_curso" name="curso" placeholder="Ex: TSI" required autocomplete="organization" value="{{ form.curso.value|default:'TSI' }}">
+                            {{ form.curso.errors }}
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="turma">Turma</label>
+                            <input type="text" id="turma" name="turma" placeholder="Ex: 3V" autocomplete="off">
+                        </div>
+
+                        <div class="input-group">
+                            <label for="id_email">E-mail Institucional</label>
+                            <input type="email" id="id_email" name="email" placeholder="seuemail@ifrn.edu.br" required autocomplete="email" value="{{ form.email.value|default:'' }}">
+                            {{ form.email.errors }}
+                        </div>
+                    </div>
+
+                    <div class="input-row">
+                        <div class="input-group">
+                            <label for="id_password1">Senha</label>
+                            <input type="password" id="id_password1" name="password1" placeholder="Digite sua senha" required autocomplete="new-password">
+                            {{ form.password1.errors }}
+                        </div>
+
+                        <div class="input-group">
+                            <label for="id_password2">Confirmar Senha</label>
+                            <input type="password" id="id_password2" name="password2" placeholder="Confirme sua senha" required autocomplete="new-password">
+                            {{ form.password2.errors }}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="cadastro-button">Criar Conta</button>
+                </form>
+
+                <div class="cadastro-links">
+                    <a href="{% url 'usuarios:entrar' %}">Já possui uma conta? Faça login</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Relatórios Administrativos - IFEED{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'estilos/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'estilos/relatorios-feedbacks.css' %}">
+{% endblock %}
+
+{% block body_attrs %}data-private="true" data-requires="administrador"{% endblock %}
+
+{% block content %}
+<main class="reports-page">
+    <section class="breadcrumb">
+        <div class="container">
+            <p>Dashboard &gt; Relatórios Administrativos</p>
+        </div>
+    </section>
+
+    <section class="reports-hero container">
+        <div>
+            <span class="reports-tag">Área do administrador</span>
+            <h1>Relatórios e gráficos de feedback</h1>
+            <p>Visualize o desempenho das refeições, acompanhe a satisfação dos estudantes e identifique pontos que precisam de atenção.</p>
+        </div>
+        <div class="reports-actions">
+            <a href="{% url 'feedbacks:analise' %}" class="button-secondary">Ver feedbacks</a>
+            <button type="button" id="printReport" class="button-primary">Imprimir relatório</button>
+        </div>
+    </section>
+
+    <section class="reports-filters container">
+        <form method="get" class="filters-card">
+            <div class="filter-field filter-field-wide">
+                <label for="reportMealFilter">Refeição</label>
+                <select id="reportMealFilter" name="refeicao">
+                    <option value="todas">Todas as refeições</option>
+                    {% for refeicao in refeicoes %}
+                        <option value="{{ refeicao.pk }}" {% if filtros.refeicao == refeicao.pk|stringformat:'s' %}selected{% endif %}>
+                            {{ refeicao.get_tipo_display }} • {{ refeicao.data_refeicao|date:"d/m/Y" }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="reportPeriodFilter">Período</label>
+                <select id="reportPeriodFilter" name="periodo">
+                    <option value="todos" {% if filtros.periodo == 'todos' %}selected{% endif %}>Todo o período</option>
+                    <option value="7" {% if filtros.periodo == '7' %}selected{% endif %}>Últimos 7 dias</option>
+                    <option value="30" {% if filtros.periodo == '30' %}selected{% endif %}>Últimos 30 dias</option>
+                    <option value="90" {% if filtros.periodo == '90' %}selected{% endif %}>Últimos 90 dias</option>
+                </select>
+            </div>
+
+            <div class="filter-buttons">
+                <button type="submit" class="button-primary">Aplicar filtros</button>
+                <a href="{% url 'feedbacks:relatorios' %}" class="button-ghost">Limpar</a>
+            </div>
+        </form>
+    </section>
+
+    <section class="summary-section container" aria-label="Resumo dos feedbacks">
+        <article class="summary-card">
+            <span class="summary-icon" aria-hidden="true">💬</span>
+            <div>
+                <p>Total de feedbacks</p>
+                <strong>{{ total_feedbacks }}</strong>
+            </div>
+        </article>
+
+        <article class="summary-card">
+            <span class="summary-icon" aria-hidden="true">⭐</span>
+            <div>
+                <p>Média geral</p>
+                <strong>{% if medias.geral %}{{ medias.geral|floatformat:2 }}{% else %}0,00{% endif %}<small>/5</small></strong>
+            </div>
+        </article>
+
+        <article class="summary-card">
+            <span class="summary-icon" aria-hidden="true">😊</span>
+            <div>
+                <p>Taxa de satisfação</p>
+                <strong>{{ satisfacao }}<small>%</small></strong>
+            </div>
+        </article>
+
+        <article class="summary-card">
+            <span class="summary-icon" aria-hidden="true">📝</span>
+            <div>
+                <p>Com comentário</p>
+                <strong>{{ com_comentario }}</strong>
+            </div>
+        </article>
+    </section>
+
+    <section class="charts-grid container">
+        <article class="chart-card" data-chart-card>
+            <div class="chart-heading">
+                <div>
+                    <span>Notas gerais</span>
+                    <h2>Distribuição das avaliações</h2>
+                </div>
+                <span class="chart-badge">1 a 5 estrelas</span>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="distributionChart" aria-label="Gráfico de distribuição das avaliações"></canvas>
+                <p class="chart-empty" hidden>Nenhum feedback encontrado para os filtros selecionados.</p>
+            </div>
+        </article>
+
+        <article class="chart-card" data-chart-card>
+            <div class="chart-heading">
+                <div>
+                    <span>Critérios avaliados</span>
+                    <h2>Média por categoria</h2>
+                </div>
+                <span class="chart-badge">Escala até 5</span>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="categoryChart" aria-label="Gráfico de média por categoria"></canvas>
+                <p class="chart-empty" hidden>Nenhum feedback encontrado para os filtros selecionados.</p>
+            </div>
+        </article>
+
+        <article class="chart-card" data-chart-card>
+            <div class="chart-heading">
+                <div>
+                    <span>Comparativo</span>
+                    <h2>Avaliações por tipo de refeição</h2>
+                </div>
+                <span class="chart-badge">Volume e média</span>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="mealChart" aria-label="Gráfico de avaliações por tipo de refeição"></canvas>
+                <p class="chart-empty" hidden>Nenhum feedback encontrado para os filtros selecionados.</p>
+            </div>
+        </article>
+
+        <article class="chart-card" data-chart-card>
+            <div class="chart-heading">
+                <div>
+                    <span>Acompanhamento</span>
+                    <h2>Evolução temporal</h2>
+                </div>
+                <span class="chart-badge">Média por dia</span>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="timelineChart" aria-label="Gráfico de evolução temporal das avaliações"></canvas>
+                <p class="chart-empty" hidden>Nenhum feedback encontrado para os filtros selecionados.</p>
+            </div>
+        </article>
+
+        <article class="chart-card chart-card-status" data-chart-card>
+            <div class="chart-heading">
+                <div>
+                    <span>Acompanhamento administrativo</span>
+                    <h2>Status das análises</h2>
+                </div>
+                <span class="chart-badge">Tratamento dos feedbacks</span>
+            </div>
+            <div class="chart-wrapper chart-wrapper-small">
+                <canvas id="statusChart" aria-label="Gráfico de status das análises administrativas"></canvas>
+                <p class="chart-empty" hidden>Nenhum feedback encontrado para os filtros selecionados.</p>
+            </div>
+        </article>
+
+        <article class="chart-card ranking-card">
+            <div class="chart-heading">
+                <div>
+                    <span>Desempenho</span>
+                    <h2>Ranking de refeições</h2>
+                </div>
+                <span class="chart-badge">Melhores médias</span>
+            </div>
+
+            <div class="ranking-table-wrapper">
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>Posição</th>
+                            <th>Refeição</th>
+                            <th>Data</th>
+                            <th>Feedbacks</th>
+                            <th>Média</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in ranking %}
+                            <tr>
+                                <td><span class="ranking-position">{{ forloop.counter }}º</span></td>
+                                <td>{{ item.tipo_label }}</td>
+                                <td>{{ item.refeicao__data_refeicao|date:"d/m/Y" }}</td>
+                                <td>{{ item.total }}</td>
+                                <td><strong>{{ item.media|floatformat:2 }} ★</strong></td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="ranking-empty">Nenhuma refeição possui feedback no período selecionado.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+
+    {{ chart_data|json_script:"feedback-chart-data" }}
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{% static 'scripts/relatorios-feedbacks.js' %}"></script>
+{% endblock %}

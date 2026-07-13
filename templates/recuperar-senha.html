@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Recuperar Senha - IFEED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'estilos/login.css' %}">{% endblock %}
+{% block content %}
+<main class="login-section recovery-section">
+    <section class="login-left recovery-left">
+        <img src="{% static 'img/logomenorsf.png' %}" alt="Logo IFEED">
+        <h2>Recupere seu acesso</h2>
+        <p>Informe seu e-mail institucional ou matrícula para redefinir a senha usada no IFEED.</p>
+
+        <div class="login-info-cards">
+            <div class="mini-card">
+                <span>🔐</span>
+                <p>A recuperação atualiza sua senha no banco do Django.</p>
+            </div>
+            <div class="mini-card">
+                <span>✅</span>
+                <p>Depois, use a nova senha no login.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="login-container">
+        <div class="login-box">
+            <img src="{% static 'img/logomenorsf.png' %}" alt="Logo IFEED" class="login-logo">
+            <h2>Redefinir senha</h2>
+            <p>Digite seus dados para criar uma nova senha.</p>
+
+            <form id="recoveryForm" method="post">
+                {% csrf_token %}
+                <div class="input-group">
+                    <label for="recoveryLogin">E-mail ou matrícula</label>
+                    <input type="text" id="recoveryLogin" name="login" placeholder="Ex.: aluno@escolar.ifrn.edu.br" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="newRecoveryPassword">Nova senha</label>
+                    <input type="password" id="newRecoveryPassword" name="newPassword" placeholder="Digite a nova senha" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="confirmRecoveryPassword">Confirmar nova senha</label>
+                    <input type="password" id="confirmRecoveryPassword" name="confirmPassword" placeholder="Repita a nova senha" required>
+                </div>
+
+                <div class="form-message" aria-live="polite"></div>
+
+                <button type="submit" class="login-button">Atualizar senha</button>
+            </form>
+
+            <div class="login-links">
+                <a href="{% url 'usuarios:entrar' %}">Voltar para o login</a>
+                <a href="{% url 'usuarios:cadastro_publico' %}">Criar uma nova conta</a>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

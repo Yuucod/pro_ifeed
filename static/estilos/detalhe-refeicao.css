@@ -1,0 +1,221 @@
+/* ==========================================================
+   DETALHE DA REFEIÇÃO - IFEED
+========================================================== */
+
+.meal-detail-page {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 15% 0%, rgba(74, 157, 95, .14), transparent 32%),
+        linear-gradient(180deg, #f8fbf8, #eef6f0);
+    padding: 42px 8% 90px;
+}
+
+.detail-hero {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: flex-end;
+    margin-bottom: 30px;
+}
+
+.back-link {
+    display: inline-block;
+    color: #4A9D5F;
+    font-weight: 700;
+    text-decoration: none;
+    margin-bottom: 14px;
+}
+
+.detail-badge {
+    display: inline-flex;
+    width: fit-content;
+    padding: 8px 14px;
+    border-radius: 999px;
+    color: #2f7446;
+    background: rgba(74, 157, 95, .12);
+    font-weight: 800;
+    margin-bottom: 12px;
+}
+
+.detail-hero h1 {
+    color: #163f2b;
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    letter-spacing: -1px;
+}
+
+.detail-hero p {
+    color: #617368;
+    line-height: 1.8;
+    max-width: 760px;
+}
+
+.detail-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(320px, .75fr);
+    gap: 26px;
+    align-items: start;
+}
+
+.detail-card,
+.detail-empty {
+    background: #fff;
+    border-radius: 30px;
+    padding: 28px;
+    border: 1px solid rgba(74, 157, 95, .12);
+    box-shadow: 0 18px 45px rgba(23, 67, 42, .08);
+}
+
+.card-header {
+    margin-bottom: 24px;
+}
+
+.card-header h2,
+.detail-card h2 {
+    color: #163f2b;
+    font-size: 1.55rem;
+}
+
+.card-header p {
+    color: #64766b;
+    margin-top: 5px;
+}
+
+.menu-groups {
+    display: grid;
+    gap: 18px;
+}
+
+.menu-group {
+    border-radius: 22px;
+    background: #f8fbf8;
+    padding: 20px;
+    border: 1px solid rgba(74, 157, 95, .10);
+}
+
+.menu-group h3 {
+    color: #163f2b;
+    margin-bottom: 12px;
+}
+
+.menu-group ul {
+    list-style: none;
+    display: grid;
+    gap: 10px;
+}
+
+.menu-group li {
+    background: #fff;
+    border-radius: 14px;
+    padding: 12px 14px;
+    border-left: 4px solid #4A9D5F;
+    color: #405648;
+}
+
+.detail-side {
+    display: grid;
+    gap: 22px;
+    position: sticky;
+    top: 24px;
+}
+
+.info-list {
+    display: grid;
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.info-list div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 13px 0;
+    border-bottom: 1px solid rgba(74, 157, 95, .12);
+}
+
+.info-list span {
+    color: #617368;
+}
+
+.info-list strong {
+    color: #163f2b;
+    text-align: right;
+}
+
+.feedback-score {
+    display: grid;
+    gap: 5px;
+    margin: 20px 0 10px;
+}
+
+.feedback-score strong {
+    color: #163f2b;
+    font-size: 3rem;
+    line-height: 1;
+}
+
+.feedback-score span {
+    color: #f5a623;
+    letter-spacing: 2px;
+}
+
+.observation-card p,
+.feedback-summary-card p {
+    color: #617368;
+    line-height: 1.8;
+    margin-top: 12px;
+}
+
+.detail-empty {
+    text-align: center;
+    color: #617368;
+}
+
+.detail-empty h2 {
+    color: #163f2b;
+    margin-bottom: 10px;
+}
+
+.detail-empty a {
+    display: inline-block;
+    margin-top: 20px;
+}
+
+@media (max-width: 1000px) {
+    .detail-hero,
+    .detail-layout {
+        grid-template-columns: 1fr;
+    }
+    .detail-hero {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .detail-actions {
+        justify-content: flex-start;
+    }
+    .detail-side {
+        position: static;
+    }
+}
+
+@media (max-width: 640px) {
+    .meal-detail-page {
+        padding-left: 5%;
+        padding-right: 5%;
+    }
+    .detail-card,
+    .detail-empty {
+        border-radius: 22px;
+        padding: 22px;
+    }
+    .detail-actions a {
+        width: 100%;
+        text-align: center;
+    }
+}

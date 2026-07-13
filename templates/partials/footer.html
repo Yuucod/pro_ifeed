@@ -1,0 +1,45 @@
+{% load static %}
+<footer class="footer">
+    <div class="footer-container">
+        <div class="footer-column">
+            <div class="footer-logo">
+                <img src="{% static 'img/logomenorsf.png' %}" alt="Logo IFEED">
+                <div>
+                    <h2>IFEED</h2>
+                    <p>Sistema Institucional de Feedback Alimentar</p>
+                </div>
+            </div>
+            <p>Plataforma desenvolvida para aproximar estudantes e gestão alimentar, promovendo melhorias na alimentação escolar.</p>
+        </div>
+
+        <div class="footer-column">
+            <h3>Navegação</h3>
+            {% if request.user.is_authenticated %}
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                <a href="{% url 'refeicoes:cardapio' %}">Cardápio</a>
+                {% if request.user.tipo_usuario == 'ADMIN' %}
+                    <a href="{% url 'refeicoes:cadastrar' %}">Cadastrar Refeição</a>
+                    <a href="{% url 'feedbacks:analise' %}">Análise de Feedbacks</a>
+                    <a href="{% url 'usuarios:listar' %}">Usuários</a>
+                {% else %}
+                    <a href="{% url 'feedbacks:avaliar' %}">Avaliar Refeição</a>
+                {% endif %}
+                <a href="{% url 'usuarios:perfil' %}">Meu Perfil</a>
+            {% else %}
+                <a href="{% url 'home' %}">Início</a>
+                <a href="{% url 'usuarios:entrar' %}">Login</a>
+                <a href="{% url 'usuarios:cadastro_publico' %}">Cadastro</a>
+            {% endif %}
+        </div>
+
+        <div class="footer-column">
+            <h3>Contato</h3>
+            <p>📍 IFRN Campus Canguaretama</p>
+            <p>📧 ifeed@ifrn.edu.br</p>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        <p>© 2026 IFEED - Sistema Institucional de Feedback Alimentar</p>
+    </div>
+</footer>

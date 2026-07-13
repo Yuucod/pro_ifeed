@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Perfil - IFEED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'estilos/perfil.css' %}">{% endblock %}
+{% block body_attrs %}data-private="true"{% endblock %}
+{% block content %}
+<main class="profile-page">
+    <section class="profile-hero-card">
+        <div class="profile-identity">
+            <div class="profile-avatar" id="profileAvatar">{% if request.user.tipo_usuario == 'ADMIN' %}🛠️{% else %}👤{% endif %}</div>
+            <div>
+                <span class="profile-role-badge" id="profileRoleBadge">{{ request.user.get_tipo_usuario_display }}</span>
+                <h1 id="userName">{{ request.user.nome }}</h1>
+                <p id="userEmail">{{ request.user.email }}</p>
+                <p class="profile-campus">📍 IFRN Campus Canguaretama</p>
+            </div>
+        </div>
+        <div class="profile-hero-actions">
+            <a id="profilePrimaryAction" href="{% url 'dashboard' %}" class="btn-profile-primary">Dashboard</a>
+            <a id="profileSecondaryAction" href="{% url 'refeicoes:cardapio' %}" class="btn-profile-secondary">Cardápio</a>
+        </div>
+    </section>
+
+    <section class="profile-metrics" aria-label="Resumo do perfil">
+        {% if request.user.tipo_usuario == 'ADMIN' %}
+            <article class="metric-card"><span id="metricOneIcon">🍽️</span><strong id="metricOneValue">{{ refeicoes|length }}</strong><p id="metricOneLabel">Refeições recentes</p></article>
+            <article class="metric-card"><span id="metricTwoIcon">📊</span><strong id="metricTwoValue">{{ request.user.administrador.refeicoes_cadastradas.count|default:0 }}</strong><p id="metricTwoLabel">Refeições cadastradas</p></article>
+            <article class="metric-card"><span id="metricThreeIcon">🛠️</span><strong id="metricThreeValue">Admin</strong><p id="metricThreeLabel">Tipo de acesso</p></article>
+            <article class="metric-card"><span id="metricFourIcon">🕒</span><strong id="metricFourValue">{{ request.user.last_login|date:"d/m"|default:"-" }}</strong><p id="metricFourLabel">Último login</p></article>
+        {% else %}
+            <article class="metric-card"><span id="metricOneIcon">⭐</span><strong id="metricOneValue">{{ feedbacks|length }}</strong><p id="metricOneLabel">Avaliações recentes</p></article>
+            <article class="metric-card"><span id="metricTwoIcon">🎓</span><strong id="metricTwoValue">{{ request.user.aluno.curso|default:"TSI" }}</strong><p id="metricTwoLabel">Curso</p></article>
+            <article class="metric-card"><span id="metricThreeIcon">📊</span><strong id="metricThreeValue">Ativo</strong><p id="metricThreeLabel">Participação</p></article>
+            <article class="metric-card"><span id="metricFourIcon">🕒</span><strong id="metricFourValue">{{ request.user.last_login|date:"d/m"|default:"-" }}</strong><p id="metricFourLabel">Último login</p></article>
+        {% endif %}
+    </section>
+
+    <section class="profile-layout">
+        <article class="profile-panel personal-panel">
+            <div class="panel-title">
+                <div>
+                    <span>Dados da conta</span>
+                    <h2>Informações pessoais</h2>
+                </div>
+                <button id="editProfileBtn" class="btn-small-action" type="button">Editar informações</button>
+            </div>
+
+            <div class="personal-details-card">
+                <div class="detail-row"><span>Nome completo</span><strong id="detailName">{{ request.user.nome }}</strong></div>
+                <div class="detail-row"><span>Matrícula</span><strong id="detailMatricula">{{ request.user.matricula|default:"-" }}</strong></div>
+                <div class="detail-row"><span>Curso / Setor</span><strong id="detailCurso">{% if request.user.tipo_usuario == 'ALUNO' %}{{ request.user.aluno.curso|default:"-" }}{% else %}{{ request.user.administrador.cargo|default:"Administrador" }}{% endif %}</strong></div>
+                <div class="detail-row"><span>E-mail institucional</span><strong id="detailEmail">{{ request.user.email }}</strong></div>
+                <div class="detail-row"><span>Tipo de usuário</span><strong id="detailType">{{ request.user.get_tipo_usuario_display }}</strong></div>
+                <div class="detail-row"><span>Status</span><strong id="detailStatus">{% if request.user.is_active %}Conta ativa{% else %}Conta inativa{% endif %}</strong></div>
+            </div>
+
+            <form id="personalEditForm" class="inline-form" method="post" hidden>
+                {% csrf_token %}
+                <input type="hidden" name="profile_action" value="update_profile">
+
+                {% if perfil_form.errors %}
+                    <div class="form-message error">Confira os campos destacados antes de salvar.</div>
+                {% endif %}
+
+                <div class="form-grid">
+                    <label class="form-field">
+                        <span>Nome completo</span>
+                        <input name="nome" type="text" value="{{ perfil_form.nome.value|default:request.user.nome }}" autocomplete="name" required>
+                        {{ perfil_form.nome.errors }}
+                    </label>
+
+                    <label class="form-field">
+                        <span>Matrícula</span>
+                        <input name="matricula" type="text" value="{{ perfil_form.matricula.value|default:request.user.matricula }}">
+                        {{ perfil_form.matricula.errors }}
+                    </label>
+
+                    {% if request.user.tipo_usuario == 'ALUNO' %}
+                        <label class="form-field">
+                            <span>Curso</span>
+                            <input name="curso" type="text" value="{{ perfil_form.curso.value|default:request.user.aluno.curso }}">
+                            {{ perfil_form.curso.errors }}
+                        </label>
+                    {% else %}
+                        <label class="form-field">
+                            <span>Cargo / setor</span>
+                            <input name="cargo" type="text" value="{{ perfil_form.cargo.value|default:request.user.administrador.cargo }}">
+                            {{ perfil_form.cargo.errors }}
+                        </label>
+                    {% endif %}
+
+                    <label class="form-field">
+                        <span>E-mail institucional</span>
+                        <input name="email" type="email" value="{{ perfil_form.email.value|default:request.user.email }}" autocomplete="email" required>
+                        {{ perfil_form.email.errors }}
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-profile-primary">Salvar alterações</button>
+                    <button type="button" id="cancelEditBtn" class="btn-profile-secondary">Cancelar</button>
+                </div>
+            </form>
+        </article>
+
+        <aside class="profile-panel security-panel">
+            <div class="panel-title">
+                <h2>Acesso e senha</h2>
+            </div>
+            <div class="security-icon">🔐</div>
+            <p class="security-text">
+                Para manter sua conta segura, altere sua senha periodicamente. Caso esqueça a senha, use a recuperação de acesso.
+            </p>
+            <div class="security-actions">
+                <a href="{% url 'usuarios:alterar_senha' %}" class="security-button">Alterar senha</a>
+                <a href="{% url 'usuarios:recuperar_senha' %}" class="forgot-link">Esqueci minha senha</a>
+            </div>
+            <div id="profileMessage" class="profile-message" aria-live="polite"></div>
+        </aside>
+    </section>
+
+    <section class="profile-panel activity-panel">
+        <div class="panel-title">
+            <h2 id="activityTitle">Atividades recentes</h2>
+            <a id="activityAction" href="{% if request.user.tipo_usuario == 'ADMIN' %}{% url 'feedbacks:analise' %}{% else %}{% url 'refeicoes:cardapio' %}{% endif %}" class="btn-small-link">Ver detalhes</a>
+        </div>
+
+        <div id="profileActivityList" class="profile-activity-list">
+            {% if request.user.tipo_usuario == 'ADMIN' %}
+                {% for refeicao in refeicoes %}
+                    <div class="activity-item">
+                        <span>🍽️</span>
+                        <div><strong>{{ refeicao.get_tipo_display }}</strong><p>{{ refeicao.data_refeicao|date:"d/m/Y" }} • {{ refeicao.get_status_display }}</p></div>
+                    </div>
+                {% empty %}
+                    <div class="activity-empty">Nenhuma refeição cadastrada ainda.</div>
+                {% endfor %}
+            {% else %}
+                {% for feedback in feedbacks %}
+                    <div class="activity-item">
+                        <span>⭐</span>
+                        <div><strong>{{ feedback.refeicao.get_tipo_display }} - {{ feedback.nota }}★</strong><p>{{ feedback.refeicao.data_refeicao|date:"d/m/Y" }}</p></div>
+                    </div>
+                {% empty %}
+                    <div class="activity-empty">Nenhuma avaliação enviada ainda.</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'scripts/perfil.js' %}"></script>
+{% endblock %}

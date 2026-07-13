@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Detalhe da Refeição - IFEED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'estilos/detalhe-refeicao.css' %}">{% endblock %}
+{% block body_attrs %}data-private="true"{% endblock %}
+{% block content %}
+<main class="meal-detail-page">
+    <section class="detail-hero">
+        <a href="{% url 'refeicoes:cardapio' %}" class="back-link">← Voltar ao cardápio</a>
+        <span id="detailBadge" class="detail-badge">{{ refeicao.get_status_display }}</span>
+        <h1 id="detailTitle">{% if refeicao.tipo == 'J' %}🌙{% else %}🍽️{% endif %} {{ refeicao.get_tipo_display }}</h1>
+        <p id="detailInfo">{{ refeicao.data_refeicao|date:"d/m/Y" }} • {{ refeicao.horario_inicio|time:"H:i" }} às {{ refeicao.horario_fim|time:"H:i" }}</p>
+        <div class="detail-actions">
+            {% if request.user.tipo_usuario == 'ALUNO' %}
+                {% if ja_avaliou %}
+                    <a id="detailPrimaryAction" class="btn-secondary" href="{% url 'dashboard' %}">Você já avaliou</a>
+                {% else %}
+                    <a id="detailPrimaryAction" class="btn-primary" href="{% url 'feedbacks:avaliar' %}?refeicao={{ refeicao.pk }}">Avaliar refeição</a>
+                {% endif %}
+            {% endif %}
+            {% if request.user.tipo_usuario == 'ADMIN' %}
+                <a id="detailPrimaryAction" class="btn-primary" href="{% url 'refeicoes:editar' refeicao.pk %}">Editar refeição</a>
+                <a id="detailSecondaryAction" class="btn-secondary" href="{% url 'feedbacks:analise' %}?refeicao={{ refeicao.pk }}">Ver feedbacks</a>
+            {% else %}
+                <a id="detailSecondaryAction" class="btn-secondary" href="{% url 'refeicoes:cardapio' %}">Ver cardápio</a>
+            {% endif %}
+        </div>
+    </section>
+
+    <section id="detailContent" class="detail-layout">
+        <article class="detail-card menu-detail-card">
+            <div class="card-header">
+                <h2>Cardápio completo</h2>
+            </div>
+
+            <div id="detailMenuGroups" class="menu-groups">
+                <div class="menu-group">
+                    <h3>Prato principal</h3>
+                    <ul>
+                        {% for item in refeicao.itens.all %}
+                            {% if item.tipo_item == 'PRATO_PRINCIPAL' %}<li>{{ item.nome }}</li>{% endif %}
+                        {% empty %}<li>Sem prato principal cadastrado.</li>{% endfor %}
+                    </ul>
+                </div>
+                <div class="menu-group">
+                    <h3>Acompanhamentos</h3>
+                    <ul>
+                        {% for item in refeicao.itens.all %}
+                            {% if item.tipo_item == 'ACOMPANHAMENTO' %}<li>{{ item.nome }}</li>{% endif %}
+                        {% empty %}<li>Sem acompanhamentos.</li>{% endfor %}
+                    </ul>
+                </div>
+                <div class="menu-group">
+                    <h3>Saladas</h3>
+                    <ul>
+                        {% for item in refeicao.itens.all %}
+                            {% if item.tipo_item == 'SALADA' %}<li>{{ item.nome }}</li>{% endif %}
+                        {% empty %}<li>Sem saladas.</li>{% endfor %}
+                    </ul>
+                </div>
+                <div class="menu-group">
+                    <h3>Bebidas</h3>
+                    <ul>
+                        {% for item in refeicao.itens.all %}
+                            {% if item.tipo_item == 'BEBIDA' %}<li>{{ item.nome }}</li>{% endif %}
+                        {% empty %}<li>Sem bebidas.</li>{% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </article>
+
+        <aside class="detail-side">
+            <article class="detail-card info-card">
+                <h2>Informações</h2>
+                <div class="info-list">
+                    <div><span>Data</span><strong id="detailDate">{{ refeicao.data_refeicao|date:"d/m/Y" }}</strong></div>
+                    <div><span>Horário</span><strong id="detailTime">{{ refeicao.horario_inicio|time:"H:i" }} às {{ refeicao.horario_fim|time:"H:i" }}</strong></div>
+                    <div><span>Campus</span><strong id="detailCampus">{{ refeicao.campus }}</strong></div>
+                    <div><span>Status</span><strong id="detailStatus">{{ refeicao.get_status_display }}</strong></div>
+                </div>
+            </article>
+
+            <article class="detail-card feedback-summary-card">
+                <h2>Resumo das avaliações</h2>
+                <div class="feedback-score">
+                    <strong id="detailAverage">{% if estatisticas.media %}{{ estatisticas.media|floatformat:1 }}{% else %}-{% endif %}</strong>
+                    <span id="detailStars">★★★★★</span>
+                    <p id="detailFeedbackCount">{{ estatisticas.total|default:0 }} feedback(s)</p>
+                </div>
+            </article>
+
+            <article class="detail-card observation-card">
+                <h2>Observações</h2>
+                <p id="detailObservation">{{ refeicao.observacoes|default:"Nenhuma observação." }}</p>
+            </article>
+        </aside>
+    </section>
+</main>
+{% endblock %}

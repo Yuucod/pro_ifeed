@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Dashboard - IFEED{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'estilos/perfil.css' %}">
+<link rel="stylesheet" href="{% static 'estilos/dashboard.css' %}">
+{% endblock %}
+{% block body_attrs %}data-private="true"{% endblock %}
+{% block content %}
+<section class="breadcrumb">
+    <div class="container">
+        <p>Início > Dashboard</p>
+    </div>
+</section>
+
+<section class="welcome-section">
+    <div class="welcome-card">
+        <div class="welcome-content">
+            <span class="welcome-tag">Sistema de Feedback Alimentar</span>
+            <h1 id="greeting" data-user-name="{{ request.user.primeiro_nome|default:request.user.nome }}">👋 Bem-vindo, {{ request.user.primeiro_nome }}!</h1>
+            <p>
+                Acompanhe o cardápio do dia, avalie as refeições e fique por
+                dentro dos avisos do refeitório.
+            </p>
+
+            <div class="welcome-info">
+                <div class="info-item">
+                    <span>📅</span>
+                    <div>
+                        <strong>Data</strong>
+                        <p id="currentDate">Carregando...</p>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <span id="mealIcon">{% if refeicao_destaque and refeicao_destaque.tipo == 'J' %}🌙{% else %}🍽️{% endif %}</span>
+                    <div>
+                        <strong id="mealTitle">{% if refeicao_destaque %}{{ refeicao_destaque.get_tipo_display }}{% else %}Refeitório{% endif %}</strong>
+                        <p id="mealStatus">{% if refeicao_destaque %}{{ refeicao_destaque.get_status_display }}{% else %}Sem refeição publicada{% endif %}</p>
+                        <small id="mealTime">
+                            {% if refeicao_destaque %}
+                                {{ refeicao_destaque.horario_inicio|time:"H:i" }} às {{ refeicao_destaque.horario_fim|time:"H:i" }}
+                            {% else %}
+                                Aguardando cadastro
+                            {% endif %}
+                        </small>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <span>📍</span>
+                    <div>
+                        <strong>Campus</strong>
+                        <p>IFRN Campus Canguaretama</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="welcome-buttons">
+                <a href="{% url 'refeicoes:cardapio' %}" class="btn-primary">Ver Cardápio</a>
+                {% if request.user.tipo_usuario == 'ALUNO' %}
+                    <a id="btnAssess" href="{% url 'feedbacks:avaliar' %}" class="btn-secondary">Avaliar Refeição</a>
+                {% endif %}
+                {% if request.user.tipo_usuario == 'ADMIN' %}
+                    <a id="btnManageMeals" href="{% url 'refeicoes:cadastrar' %}" class="btn-secondary">Cadastrar Refeição</a>
+                    <a id="btnViewFeedbacks" href="{% url 'feedbacks:analise' %}" class="btn-secondary">Ver Feedbacks</a>
+                    <a id="btnViewReports" href="{% url 'feedbacks:relatorios' %}" class="btn-secondary">Ver Relatórios</a>
+                    <a id="btnManageUsers" href="{% url 'usuarios:listar' %}" class="btn-secondary">Gerenciar Usuários</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if request.user.tipo_usuario == 'ADMIN' %}
+<section id="adminAnalytics" class="analytics-section">
+    <div class="container">
+        <h2>Analytics de Feedbacks</h2>
+        <div class="analytics-grid">
+            <div class="analytics-card">
+                <h3>Total de Feedbacks</h3>
+                <p id="totalFeedbacks">{{ total_feedbacks }}</p>
+            </div>
+            <div class="analytics-card">
+                <h3>Média Geral</h3>
+                <p id="avgRating">{% if media_geral %}{{ media_geral|floatformat:2 }}{% else %}-{% endif %}</p>
+            </div>
+            <div class="analytics-card">
+                <h3>Taxa de Satisfação</h3>
+                <p id="satisfactionRate">{{ satisfacao }}%</p>
+            </div>
+        </div>
+
+        <div class="chart-area">
+            <h4>Distribuição de Avaliações</h4>
+            <div id="ratingBars" class="rating-bars">
+                {% for item in distribuicao %}
+                    <div class="rating-row">
+                        <div class="rating-label">{{ item.nota }}★</div>
+                        <div class="rating-bar-wrap"><div class="rating-bar" style="width:{{ item.percent }}%;"></div></div>
+                        <div class="rating-count">{{ item.total }} ({{ item.percent }}%)</div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="feedback-review-area">
+            <div class="section-inline-header">
+                <h4>Feedbacks recentes</h4>
+                <a href="{% url 'feedbacks:analise' %}" class="analytics-link">Abrir análise completa</a>
+            </div>
+            <div id="adminFeedbackList" class="admin-feedback-list">
+                {% for feedback in feedbacks_recentes %}
+                    <div class="admin-feedback-card">
+                        <div class="feedback-header">
+                            <span class="feedback-user">{{ feedback.aluno.usuario.nome }}</span>
+                            <span class="feedback-date">{{ feedback.criado_em|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        <div class="feedback-body">
+                            <div><strong>Refeição:</strong> {{ feedback.refeicao.get_tipo_display }} • {{ feedback.refeicao.data_refeicao|date:"d/m/Y" }}</div>
+                            <div><strong>Nota:</strong> {{ feedback.nota }}★</div>
+                            <div class="feedback-comment"><strong>Comentário:</strong> {{ feedback.comentario|default:"Sem comentário" }}</div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="no-feedback">Nenhum feedback enviado ainda.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<section class="resume-section">
+    <div class="cards-resume">
+        <article class="resume-card">
+            🍽️
+            <h3>Cardápio Hoje</h3>
+            <p>{% if refeicao_destaque %}{{ refeicao_destaque.get_tipo_display }} disponível{% else %}Nenhuma refeição publicada{% endif %}</p>
+        </article>
+
+        <article class="resume-card">
+            ⭐
+            <h3>Avaliações</h3>
+            <p>{% if request.user.tipo_usuario == 'ALUNO' %}{{ minhas_avaliacoes|default:0 }} realizadas{% else %}{{ total_feedbacks }} recebidas{% endif %}</p>
+        </article>
+
+        <article class="resume-card">
+            📢
+            <h3>Avisos</h3>
+            <p>2 novos</p>
+        </article>
+
+        <article class="resume-card">
+            📊
+            <h3>Participação</h3>
+            <p>{% if request.user.tipo_usuario == 'ADMIN' %}{{ total_usuarios }} usuários{% else %}Acompanhe seu histórico{% endif %}</p>
+        </article>
+    </div>
+</section>
+
+<section class="dashboard-grid">
+    <article class="dashboard-card">
+        <h2 id="dashboardMealTitle">
+            {% if refeicao_destaque %}{{ refeicao_destaque.get_tipo_display }} publicado{% else %}🍛 Cardápio de Hoje{% endif %}
+        </h2>
+
+        <p id="dashboardMealInfo" class="dashboard-meal-info">
+            {% if refeicao_destaque %}
+                {{ refeicao_destaque.data_refeicao|date:"d/m/Y" }} • {{ refeicao_destaque.horario_inicio|time:"H:i" }} às {{ refeicao_destaque.horario_fim|time:"H:i" }}
+            {% else %}
+                Refeições publicadas pelo administrador aparecerão aqui.
+            {% endif %}
+        </p>
+
+        <ul id="dashboardMealList">
+            {% if refeicao_destaque %}
+                {% for item in refeicao_destaque.itens.all|slice:":6" %}
+                    <li>{{ item.get_tipo_item_display }}: {{ item.nome }}</li>
+                {% empty %}
+                    <li>Cardápio sem itens detalhados.</li>
+                {% endfor %}
+            {% else %}
+                <li>Nenhuma refeição carregada.</li>
+            {% endif %}
+        </ul>
+
+        <a href="{% url 'refeicoes:cardapio' %}">Ver Cardápio Completo</a>
+    </article>
+
+    <article class="dashboard-card">
+        <h2>📢 Avisos</h2>
+        <ul>
+            <li>Novo cardápio disponível.</li>
+            <li>Refeitório segue os horários cadastrados.</li>
+            <li>Pesquisa de satisfação aberta.</li>
+        </ul>
+    </article>
+</section>
+
+{% if request.user.tipo_usuario == 'ALUNO' %}
+<section class="quick-review">
+    <div class="review-box">
+        <h2>Como foi sua refeição hoje?</h2>
+        <p>Sua opinião ajuda a melhorar a alimentação estudantil.</p>
+        <a href="{% url 'feedbacks:avaliar' %}" class="review-button">Avaliar Refeição</a>
+    </div>
+</section>
+
+<section class="history">
+    <h2>Últimas Avaliações</h2>
+    <div id="studentHistoryList" class="history-list">
+        {% for feedback in meus_feedbacks %}
+            <div class="history-item">
+                <span>{{ feedback.refeicao.data_refeicao|date:"d/m" }}</span>
+                <div class="stars">{{ feedback.nota }}★</div>
+            </div>
+        {% empty %}
+            <div class="history-item">
+                <span>Nenhuma avaliação</span>
+                <div class="stars">Envie seu primeiro feedback</div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'scripts/dashboard.js' %}"></script>
+{% endblock %}

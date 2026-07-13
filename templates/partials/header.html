@@ -1,0 +1,55 @@
+{% load static %}
+<header class="header">
+    <div class="top-header">
+        <span>🍽️ Sistema Institucional de Feedback Alimentar Estudantil</span>
+        <span>📍 IFRN Campus Canguaretama</span>
+    </div>
+
+    <div class="main-header">
+        <div class="logo-area">
+            <img src="{% static 'img/logomenorsf.png' %}" alt="Logo IFEED">
+            <div>
+                <h1>IFEED</h1>
+                <p>Conectando estudantes e alimentação escolar</p>
+            </div>
+        </div>
+
+        <nav class="menu" aria-label="Navegação principal">
+            <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="main-navigation">Menu</button>
+            <ul id="main-navigation">
+                {% if request.user.is_authenticated %}
+                    <li><a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">Dashboard</a></li>
+                    <li><a href="{% url 'refeicoes:cardapio' %}" class="{% if request.resolver_match.namespace == 'refeicoes' and request.resolver_match.url_name == 'cardapio' %}active{% endif %}">Cardápio</a></li>
+
+                    {% if request.user.tipo_usuario == 'ALUNO' %}
+                        <li><a href="{% url 'feedbacks:avaliar' %}" class="{% if request.resolver_match.namespace == 'feedbacks' and request.resolver_match.url_name == 'avaliar' %}active{% endif %}">Avaliar Refeição</a></li>
+                    {% endif %}
+
+                    {% if request.user.tipo_usuario == 'ADMIN' %}
+                        <li><a href="{% url 'refeicoes:cadastrar' %}" class="{% if request.resolver_match.namespace == 'refeicoes' and request.resolver_match.url_name == 'cadastrar' %}active{% endif %}">Cadastrar Refeição</a></li>
+                        <li><a href="{% url 'feedbacks:analise' %}" class="{% if request.resolver_match.namespace == 'feedbacks' and request.resolver_match.url_name == 'analise' %}active{% endif %}">Feedbacks</a></li>
+                        <li><a href="{% url 'feedbacks:relatorios' %}" class="{% if request.resolver_match.namespace == 'feedbacks' and request.resolver_match.url_name == 'relatorios' %}active{% endif %}">Relatórios</a></li>
+                        <li><a href="{% url 'usuarios:listar' %}" class="{% if request.resolver_match.namespace == 'usuarios' and request.resolver_match.url_name == 'listar' %}active{% endif %}">Usuários</a></li>
+                    {% endif %}
+
+                    <li><a href="{% url 'usuarios:perfil' %}" class="{% if request.resolver_match.namespace == 'usuarios' and request.resolver_match.url_name == 'perfil' %}active{% endif %}">Meu Perfil</a></li>
+                    <li><a href="{% url 'usuarios:sair' %}" class="btn-logout">Sair</a></li>
+                {% else %}
+                    {% if request.resolver_match.url_name == 'home' %}
+                        <li><a href="#inicio">Início</a></li>
+                        <li><a href="#informacoes">Informações</a></li>
+                        <li><a href="#avisos">Avisos</a></li>
+                        <li><a href="#cardapio">Cardápio</a></li>
+                        <li><a href="{% url 'usuarios:entrar' %}">Login</a></li>
+                        <li><a href="{% url 'usuarios:cadastro_publico' %}">Cadastro</a></li>
+                        <li><a href="{% url 'usuarios:entrar' %}" class="btn-login">Entrar</a></li>
+                    {% else %}
+                        <li><a href="{% url 'home' %}">Início</a></li>
+                        <li><a href="{% url 'usuarios:entrar' %}" class="{% if request.resolver_match.namespace == 'usuarios' and request.resolver_match.url_name == 'entrar' %}active{% endif %}">Login</a></li>
+                        <li><a href="{% url 'usuarios:cadastro_publico' %}" class="{% if request.resolver_match.namespace == 'usuarios' and request.resolver_match.url_name == 'cadastro_publico' %}active{% endif %}">Cadastro</a></li>
+                    {% endif %}
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</header>

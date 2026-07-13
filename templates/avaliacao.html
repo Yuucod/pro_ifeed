@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Avaliação - IFEED{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'estilos/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'estilos/perfil.css' %}">
+{% endblock %}
+{% block body_attrs %}data-private="true" data-requires="aluno"{% endblock %}
+{% block content %}
+<main>
+    <section class="evaluation-section">
+        <div class="evaluation-hero">
+            <div class="evaluation-header">
+                <span class="evaluation-tag">Avaliação de Refeição</span>
+                <h1>Como foi sua refeição hoje?</h1>
+                <p>Compartilhe sua opinião com poucos cliques. Sua avaliação ajuda a tornar o cardápio mais gostoso e nutritivo.</p>
+            </div>
+
+            <div class="evaluation-card">
+                <form id="evaluationForm" method="post">
+                    {% csrf_token %}
+
+                    <div id="selectedMealCard" class="selected-meal-card">
+                        <div>
+                            <span class="evaluation-tag">Refeição selecionada</span>
+                            <h2 id="selectedMealTitle">{% if refeicao %}{{ refeicao.get_tipo_display }}{% else %}Escolha uma refeição{% endif %}</h2>
+                            <p id="selectedMealInfo">
+                                {% if refeicao %}
+                                    {{ refeicao.data_refeicao|date:"d/m/Y" }} • {{ refeicao.horario_inicio|time:"H:i" }} às {{ refeicao.horario_fim|time:"H:i" }}
+                                {% else %}
+                                    Escolha uma refeição publicada para avaliar.
+                                {% endif %}
+                            </p>
+                        </div>
+
+                        <div class="form-group meal-select-group">
+                            <label for="mealSelect">Selecionar refeição</label>
+                            {% if refeicao %}
+                                <input type="hidden" name="refeicao_id" value="{{ refeicao.pk }}">
+                                <select id="mealSelect" disabled>
+                                    <option>{{ refeicao.get_tipo_display }} - {{ refeicao.data_refeicao|date:"d/m/Y" }}</option>
+                                </select>
+                            {% else %}
+                                <select id="mealSelect" name="refeicao_id" required>
+                                    <option value="">Selecione</option>
+                                    {% for item in refeicoes %}
+                                        <option value="{{ item.pk }}">{{ item.get_tipo_display }} - {{ item.data_refeicao|date:"d/m/Y" }}</option>
+                                    {% endfor %}
+                                </select>
+                            {% endif %}
+                        </div>
+
+                        <ul id="selectedMealItems" class="selected-meal-items">
+                            {% if refeicao %}
+                                {% for item in refeicao.itens.all %}
+                                    <li>{{ item.get_tipo_item_display }}: {{ item.nome }}</li>
+                                {% empty %}
+                                    <li>Cardápio sem itens detalhados.</li>
+                                {% endfor %}
+                            {% else %}
+                                <li>Os itens da refeição aparecerão após a seleção.</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="form-message error">{{ form.non_field_errors }}</div>
+                    {% endif %}
+
+                    <div class="form-group rating-group">
+                        <label>Nota para a refeição</label>
+                        <div class="stars" role="radiogroup" aria-label="Nota da refeição">
+                            <button type="button" class="star active" data-value="1" aria-label="1 estrela">★</button>
+                            <button type="button" class="star active" data-value="2" aria-label="2 estrelas">★</button>
+                            <button type="button" class="star active" data-value="3" aria-label="3 estrelas">★</button>
+                            <button type="button" class="star active" data-value="4" aria-label="4 estrelas">★</button>
+                            <button type="button" class="star active" data-value="5" aria-label="5 estrelas">★</button>
+                        </div>
+                        <input type="hidden" id="ratingValue" name="nota" value="{{ form.nota.value|default:5 }}">
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Sabor</label>
+                            <div class="option-row">
+                                <label><input type="radio" name="sabor" value="1"> Muito ruim</label>
+                                <label><input type="radio" name="sabor" value="2"> Ruim</label>
+                                <label><input type="radio" name="sabor" value="4" checked> Boa</label>
+                                <label><input type="radio" name="sabor" value="5"> Excelente</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Temperatura</label>
+                            <div class="option-row">
+                                <label><input type="radio" name="temperatura" value="1"> Muito ruim</label>
+                                <label><input type="radio" name="temperatura" value="2"> Ruim</label>
+                                <label><input type="radio" name="temperatura" value="4" checked> Boa</label>
+                                <label><input type="radio" name="temperatura" value="5"> Excelente</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Quantidade</label>
+                            <div class="option-row">
+                                <label><input type="radio" name="quantidade" value="1"> Muito ruim</label>
+                                <label><input type="radio" name="quantidade" value="2"> Ruim</label>
+                                <label><input type="radio" name="quantidade" value="4" checked> Boa</label>
+                                <label><input type="radio" name="quantidade" value="5"> Excelente</label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Variedade</label>
+                            <div class="option-row">
+                                <label><input type="radio" name="variedade" value="1"> Muito ruim</label>
+                                <label><input type="radio" name="variedade" value="2"> Ruim</label>
+                                <label><input type="radio" name="variedade" value="4" checked> Boa</label>
+                                <label><input type="radio" name="variedade" value="5"> Excelente</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="comment">Comentário</label>
+                        <textarea id="comment" name="comentario" placeholder="Conte como foi sua experiência" rows="5">{{ form.comentario.value|default:'' }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="suggestion">Sugestão</label>
+                        <textarea id="suggestion" name="sugestao" placeholder="Deixe uma sugestão de melhoria" rows="4">{{ form.sugestao.value|default:'' }}</textarea>
+                    </div>
+
+                    <div class="submit-row">
+                        <button type="submit" class="btn-primary btn-submit">Enviar Avaliação</button>
+                    </div>
+
+                    <div class="form-message" id="evaluationMessage" aria-live="polite"></div>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const stars = document.querySelectorAll('.star');
+    const ratingValue = document.getElementById('ratingValue');
+    const updateStars = (value) => {
+        stars.forEach((star) => {
+            star.classList.toggle('active', Number(star.dataset.value) <= value);
+        });
+        ratingValue.value = String(value);
+    };
+    stars.forEach((star) => {
+        star.addEventListener('click', () => updateStars(Number(star.dataset.value)));
+    });
+    updateStars(Number(ratingValue?.value || 5));
+});
+</script>
+{% endblock %}

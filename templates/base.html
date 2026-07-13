@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    {% include 'partials/head.html' %}
+    <title>{% block title %}IFEED{% endblock %}</title>
+    {% block extra_css %}{% endblock %}
+</head>
+<body {% block body_attrs %}{% endblock %}>
+    {% include 'partials/header.html' %}
+    {% if messages %}
+        <div class="django-messages">
+            {% for message in messages %}
+                <p class="form-message {{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+    {% include 'partials/footer.html' %}
+    <script src="{% static 'scripts/menu-toggle.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Início - IFEED{% endblock %}
+{% block content %}
+<main>
+
+    <!-- HERO -->
+    <section class="hero" id="inicio">
+        <div class="hero-text">
+            <h2>Sua opinião ajuda a melhorar a alimentação estudantil.</h2>
+
+            <p>
+                O IFEED foi criado para aproximar os estudantes da gestão da alimentação escolar,
+                permitindo avaliações, sugestões e acompanhamento das refeições servidas.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="{% url 'usuarios:entrar' %}" class="btn-primary">Entrar no Sistema</a>
+                <a href="#cardapio" class="btn-secondary">Ver Cardápio</a>
+            </div>
+        </div>
+
+        <div class="hero-image">
+            <img src="{% static 'img/logograndesf.png' %}" alt="Logo IFEED">
+        </div>
+    </section>
+
+
+    <!-- CARDS -->
+    <section class="cards-section" id="informacoes">
+        <h2>Informações Importantes</h2>
+
+        <div class="cards-container">
+
+            <div class="card">
+                <div class="card-icon">🧼</div>
+                <h3>Higiene Antes da Alimentação</h3>
+                <p>
+                    Lave as mãos antes das refeições para garantir mais segurança e saúde.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">🍽️</div>
+                <h3>Evite o Desperdício</h3>
+                <p>
+                    Pegue apenas o necessário e contribua para uma alimentação mais consciente.
+                </p>
+            </div>
+
+            <div class="card" id="cardapio-info">
+                <div class="card-icon">📋</div>
+                <h3>Cardápio do Dia</h3>
+                <p>
+                    Confira as refeições disponíveis e acompanhe as novidades do refeitório.
+                </p>
+            </div>
+
+            <div class="card">
+                <div class="card-icon">⭐</div>
+                <h3>Dê seu Feedback</h3>
+                <p>
+                    Sua avaliação ajuda na melhoria contínua da alimentação estudantil.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- CARDÁPIO -->
+    <section class="cardapio" id="cardapio" aria-labelledby="cardapio-title">
+        <h2 id="cardapio-title">Cardápio da Semana</h2>
+
+        <div class="menu-grid">
+            <article class="menu-item">
+                <h3>Segunda-feira</h3>
+                <p>Arroz integral, feijão, frango grelhado, salada de alface com tomate e suco de laranja.</p>
+            </article>
+
+            <article class="menu-item">
+                <h3>Quarta-feira</h3>
+                <p>Macarrão ao molho de tomate, almôndegas ao forno, mix de legumes e água aromatizada.</p>
+            </article>
+
+            <article class="menu-item">
+                <h3>Sexta-feira</h3>
+                <p>Escondidinho de carne seca, salada de couve, pão integral e fruta da estação.</p>
+            </article>
+        </div>
+    </section>
+
+
+    <!-- AVISOS -->
+    <section class="avisos" id="avisos">
+        <h2>Avisos do Campus</h2>
+
+        <div class="avisos-container">
+
+            <div class="aviso-box">
+                <h3>Atualização no Cardápio</h3>
+                <p>
+                    O cardápio desta semana recebeu novas opções de saladas e frutas.
+                </p>
+            </div>
+
+            <div class="aviso-box">
+                <h3>Horário do Refeitório</h3>
+                <p>
+                    O funcionamento do almoço ocorre das 11h30 às 13h. <br>
+                    O jantar é servido das 17h40 às 18h40.
+                </p>
+            </div>
+
+            <div class="aviso-box">
+                <h3>Participe do IFEED</h3>
+                <p>
+                    Avalie as refeições e ajude a melhorar a experiência alimentar no campus.
+                </p>
+            </div>
+
+        </div>
+    </section>
+
+    </main>
+{% endblock %}
+{% block extra_js %}<script src="{% static 'scripts/index.js' %}"></script>{% endblock %}

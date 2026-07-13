@@ -1,0 +1,205 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Cadastro de Refeições - IFEED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'estilos/cadastro-refeicao.css' %}">{% endblock %}
+{% block body_attrs %}data-private="true" data-requires="administrador"{% endblock %}
+{% block content %}
+<main class="meal-page">
+    <section class="breadcrumb">
+        <a href="{% url 'dashboard' %}">Dashboard</a>
+        <span>/</span>
+        <span>Cadastro de Refeições</span>
+    </section>
+
+    <section class="page-header">
+        <h1>{{ titulo|default:"Cadastro de Refeições" }}</h1>
+        <p>
+            Cadastre, edite e publique as refeições que serão
+            disponibilizadas aos estudantes.
+        </p>
+    </section>
+
+    <form method="post">
+        {% csrf_token %}
+        <section class="meal-container">
+            <div class="meal-form">
+                {% if form.non_field_errors %}
+                    <div class="form-message error">{{ form.non_field_errors }}</div>
+                {% endif %}
+
+                <div class="card">
+                    <div class="card-title">
+                        <h2>Informações Gerais</h2>
+                        <p>Defina os dados da refeição.</p>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="id_data_refeicao">Data</label>
+                                <input type="date" id="id_data_refeicao" name="data_refeicao" value="{{ form.data_refeicao.value|date:'Y-m-d'|default_if_none:'' }}" required>
+                                {{ form.data_refeicao.errors }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_tipo">Tipo</label>
+                                <select id="id_tipo" name="tipo" required>
+                                    <option value="A" {% if form.tipo.value == 'A' %}selected{% endif %}>Almoço</option>
+                                    <option value="J" {% if form.tipo.value == 'J' %}selected{% endif %}>Jantar</option>
+                                    <option value="L" {% if form.tipo.value == 'L' %}selected{% endif %}>Lanche</option>
+                                </select>
+                                {{ form.tipo.errors }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_campus">Campus</label>
+                                <input type="text" id="id_campus" name="campus" value="{{ form.campus.value|default:'IFRN Campus Canguaretama' }}" readonly>
+                                {{ form.campus.errors }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_status">Status</label>
+                                <select id="id_status" name="status">
+                                    <option value="PUBLICADO" {% if form.status.value == 'PUBLICADO' %}selected{% endif %}>Publicado</option>
+                                    <option value="RASCUNHO" {% if form.status.value == 'RASCUNHO' %}selected{% endif %}>Rascunho</option>
+                                    <option value="ENCERRADA" {% if form.status.value == 'ENCERRADA' %}selected{% endif %}>Encerrada</option>
+                                    <option value="CANCELADA" {% if form.status.value == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
+                                </select>
+                                {{ form.status.errors }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_turno">Turno</label>
+                                <select id="id_turno" name="turno" required>
+                                    <option value="M" {% if form.turno.value == 'M' %}selected{% endif %}>Manhã</option>
+                                    <option value="V" {% if form.turno.value == 'V' %}selected{% endif %}>Vespertino</option>
+                                    <option value="N" {% if form.turno.value == 'N' %}selected{% endif %}>Noturno</option>
+                                </select>
+                                {{ form.turno.errors }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_horario_inicio">Horário Inicial</label>
+                                <input type="time" id="id_horario_inicio" name="horario_inicio" value="{{ form.horario_inicio.value|time:'H:i'|default_if_none:'' }}" required>
+                                {{ form.horario_inicio.errors }}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="id_horario_fim">Horário Final</label>
+                                <input type="time" id="id_horario_fim" name="horario_fim" value="{{ form.horario_fim.value|time:'H:i'|default_if_none:'' }}" required>
+                                {{ form.horario_fim.errors }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <h2>Cardápio</h2>
+                        <p>Informe os alimentos servidos.</p>
+                    </div>
+                    <div class="card-content">
+                        <div class="form-group">
+                            <label for="id_prato_principal">Prato Principal</label>
+                            <textarea id="id_prato_principal" name="prato_principal" rows="2" placeholder="Digite um item por linha">{{ form.prato_principal.value|default_if_none:'' }}</textarea>
+                            {{ form.prato_principal.errors }}
+                        </div>
+
+                        <div class="dynamic-section">
+                            <div class="section-header">
+                                <h3>Acompanhamentos</h3>
+                            </div>
+                            <textarea id="id_acompanhamentos" name="acompanhamentos" rows="4" placeholder="Digite um item por linha">{{ form.acompanhamentos.value|default_if_none:'' }}</textarea>
+                            {{ form.acompanhamentos.errors }}
+                        </div>
+
+                        <div class="dynamic-section">
+                            <div class="section-header">
+                                <h3>Saladas</h3>
+                            </div>
+                            <textarea id="id_saladas" name="saladas" rows="4" placeholder="Digite um item por linha">{{ form.saladas.value|default_if_none:'' }}</textarea>
+                            {{ form.saladas.errors }}
+                        </div>
+
+                        <div class="dynamic-section">
+                            <div class="section-header">
+                                <h3>Bebidas</h3>
+                            </div>
+                            <textarea id="id_bebidas" name="bebidas" rows="4" placeholder="Digite um item por linha">{{ form.bebidas.value|default_if_none:'' }}</textarea>
+                            {{ form.bebidas.errors }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <h2>Observações</h2>
+                    </div>
+                    <div class="card-content">
+                        <textarea id="id_observacoes" name="observacoes" rows="5" placeholder="Digite informações adicionais...">{{ form.observacoes.value|default_if_none:'' }}</textarea>
+                        {{ form.observacoes.errors }}
+                    </div>
+                </div>
+            </div>
+
+            <aside class="preview-card">
+                <div class="preview-header">
+                    <h2>Pré-visualização</h2>
+                    <span>Visualização do aluno</span>
+                </div>
+                <div class="preview-content">
+                    <div class="meal-preview">
+                        <h3>🍽️ Refeição</h3>
+                        <p>Os dados cadastrados aparecerão no cardápio público dos estudantes.</p>
+                        <hr>
+                        <ul id="previewMenu">
+                            <li>Prato Principal</li>
+                            <li>Acompanhamentos</li>
+                            <li>Saladas</li>
+                            <li>Bebidas</li>
+                        </ul>
+                        <hr>
+                        <p id="previewObservation">Use os campos ao lado para cadastrar o cardápio.</p>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <section class="actions">
+            <a class="btn-secondary" href="{% url 'refeicoes:cadastrar' %}">Limpar</a>
+            <button class="btn-primary" type="submit">Salvar Refeição</button>
+        </section>
+    </form>
+
+    <section class="history">
+        <div class="history-header">
+            <h2>Refeições Cadastradas</h2>
+            <p>Últimas refeições publicadas.</p>
+        </div>
+
+        <div id="mealList" class="history-grid">
+            {% for refeicao in refeicoes %}
+                <article class="meal-item">
+                    <h3>{% if refeicao.tipo == 'J' %}🌙{% else %}🍽️{% endif %} {{ refeicao.get_tipo_display }}</h3>
+                    <p>📅 {{ refeicao.data_refeicao|date:"d/m/Y" }}</p>
+                    <p>🕒 {{ refeicao.horario_inicio|time:"H:i" }} às {{ refeicao.horario_fim|time:"H:i" }}</p>
+                    <span class="status {% if refeicao.status == 'PUBLICADO' %}published{% else %}draft{% endif %}">{{ refeicao.get_status_display }}</span>
+                    <p><strong>Itens:</strong> {{ refeicao.itens.count }}</p>
+                    <div class="item-buttons">
+                        <a href="{% url 'refeicoes:detalhe' refeicao.pk %}">👁 Visualizar</a>
+                        <a href="{% url 'refeicoes:editar' refeicao.pk %}">✏️ Editar</a>
+                        <form method="post" action="{% url 'refeicoes:excluir' refeicao.pk %}" onsubmit="return confirm('Excluir refeição?')">
+                            {% csrf_token %}
+                            <button type="submit">🗑 Excluir</button>
+                        </form>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="empty-history">
+                    <h3>🍽️ Nenhuma refeição cadastrada</h3>
+                    <p>As refeições cadastradas aparecerão aqui.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+{% endblock %}

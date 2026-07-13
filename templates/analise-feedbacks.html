@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Análise de Feedbacks - IFEED{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'estilos/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'estilos/feedbacks.css' %}">
+{% endblock %}
+{% block body_attrs %}data-private="true" data-requires="administrador"{% endblock %}
+{% block content %}
+<main class="feedbacks-page">
+    <section class="breadcrumb">
+        <div class="container">
+            <p>Dashboard > Análise de Feedbacks</p>
+        </div>
+    </section>
+
+    <section class="page-header feedbacks-header">
+        <h1>Análise de Feedbacks</h1>
+        <p>Acompanhe os resultados das avaliações enviadas pelos estudantes e identifique rapidamente as refeições mais bem avaliadas e os principais pontos de melhoria.</p>
+        <a href="{% url 'feedbacks:relatorios' %}" class="btn-primary">Abrir relatórios e gráficos</a>
+    </section>
+
+    <section class="feedbacks-toolbar container">
+        <form method="get" class="toolbar-card">
+            <div class="filter-group">
+                <label for="feedbackMealFilter">Refeição</label>
+                <select id="feedbackMealFilter" name="refeicao">
+                    <option value="todas">Todas as refeições</option>
+                    {% for refeicao in refeicoes %}
+                        <option value="{{ refeicao.pk }}" {% if filtros.refeicao == refeicao.pk|stringformat:'s' %}selected{% endif %}>{{ refeicao.get_tipo_display }} • {{ refeicao.data_refeicao|date:"d/m/Y" }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="feedbackDateFilter">Período</label>
+                <select id="feedbackDateFilter" name="periodo">
+                    <option value="todos" {% if filtros.periodo == 'todos' %}selected{% endif %}>Todo o período</option>
+                    <option value="7" {% if filtros.periodo == '7' %}selected{% endif %}>Últimos 7 dias</option>
+                    <option value="30" {% if filtros.periodo == '30' %}selected{% endif %}>Últimos 30 dias</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="feedbackRatingFilter">Nota mínima</label>
+                <select id="feedbackRatingFilter" name="nota">
+                    <option value="0" {% if filtros.nota == '0' %}selected{% endif %}>Todas</option>
+                    <option value="5" {% if filtros.nota == '5' %}selected{% endif %}>5 estrelas</option>
+                    <option value="4" {% if filtros.nota == '4' %}selected{% endif %}>4 estrelas ou mais</option>
+                    <option value="3" {% if filtros.nota == '3' %}selected{% endif %}>3 estrelas ou mais</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>&nbsp;</label>
+                <button class="btn-primary" type="submit">Filtrar</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="analytics-section">
+        <div class="container">
+            <div class="analytics-grid feedbacks-summary-grid">
+                <div class="analytics-card"><h3>Total de feedbacks</h3><p id="analysisTotalFeedbacks">{{ total_feedbacks }}</p></div>
+                <div class="analytics-card"><h3>Média geral</h3><p id="analysisAvgRating">{% if medias.media %}{{ medias.media|floatformat:2 }}{% else %}-{% endif %}</p></div>
+                <div class="analytics-card"><h3>Melhor refeição</h3><p id="bestMeal">{% if melhor %}{{ melhor.media|floatformat:1 }}★{% else %}-{% endif %}</p></div>
+                <div class="analytics-card"><h3>Ponto de atenção</h3><p id="worstMeal">{% if pior %}{{ pior.media|floatformat:1 }}★{% else %}-{% endif %}</p></div>
+            </div>
+
+            <div class="analysis-panels">
+                <article class="panel-card">
+                    <div class="panel-header">
+                        <h2>Distribuição de notas</h2>
+                        <span>Panorama geral</span>
+                    </div>
+                    <div id="analysisRatingBars" class="rating-bars">
+                        {% for item in distribuicao %}
+                            <div class="rating-row">
+                                <div class="rating-label">{{ item.nota }}★</div>
+                                <div class="rating-bar-wrap"><div class="rating-bar" style="width:{{ item.percent }}%;"></div></div>
+                                <div class="rating-count">{{ item.total }} ({{ item.percent }}%)</div>
+                            </div>
+                        {% empty %}
+                            <p class="analysis-empty">Nenhum feedback encontrado.</p>
+                        {% endfor %}
+                    </div>
+                </article>
+
+                <article class="panel-card">
+                    <div class="panel-header">
+                        <h2>Médias por critério</h2>
+                        <span>Sabor, temperatura, quantidade e variedade</span>
+                    </div>
+                    <div id="criteriaAverages" class="criteria-grid">
+                        <div class="criteria-item"><strong>{% if medias.sabor %}{{ medias.sabor|floatformat:2 }}{% else %}-{% endif %}</strong><span>Sabor</span></div>
+                        <div class="criteria-item"><strong>{% if medias.temperatura %}{{ medias.temperatura|floatformat:2 }}{% else %}-{% endif %}</strong><span>Temperatura</span></div>
+                        <div class="criteria-item"><strong>{% if medias.quantidade %}{{ medias.quantidade|floatformat:2 }}{% else %}-{% endif %}</strong><span>Quantidade</span></div>
+                        <div class="criteria-item"><strong>{% if medias.variedade %}{{ medias.variedade|floatformat:2 }}{% else %}-{% endif %}</strong><span>Variedade</span></div>
+                    </div>
+                </article>
+            </div>
+
+            <article class="panel-card meal-performance-card">
+                <div class="panel-header">
+                    <h2>Desempenho por refeição</h2>
+                    <span>Comparativo entre refeições cadastradas</span>
+                </div>
+                <div id="mealPerformanceList" class="meal-performance-list">
+                    {% for item in por_refeicao %}
+                        <div class="meal-performance-card-item">
+                            <h3>{{ item.refeicao__tipo }} • {{ item.refeicao__data_refeicao|date:"d/m/Y" }}</h3>
+                            <div class="performance-meta">
+                                <span><strong>Média:</strong> {{ item.media|floatformat:2 }} / 5</span>
+                                <span><strong>Feedbacks:</strong> {{ item.total }}</span>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="analysis-empty">Nenhuma refeição com feedback encontrada.</div>
+                    {% endfor %}
+                </div>
+            </article>
+
+            <article class="panel-card">
+                <div class="panel-header">
+                    <h2>Comentários dos estudantes</h2>
+                    <span>Feedbacks mais recentes</span>
+                </div>
+                <div id="analysisFeedbackList" class="admin-feedback-list">
+                    {% for feedback in feedbacks %}
+                        <div class="admin-feedback-card">
+                            <div class="feedback-header">
+                                <span class="feedback-user">{{ feedback.aluno.usuario.nome }} ({{ feedback.aluno.usuario.matricula|default:"---" }})</span>
+                                <span class="feedback-date">{{ feedback.criado_em|date:"d/m/Y H:i" }}</span>
+                            </div>
+                            <div class="feedback-body">
+                                <div><strong>Refeição:</strong> {{ feedback.refeicao.get_tipo_display }} • {{ feedback.refeicao.data_refeicao|date:"d/m/Y" }}</div>
+                                <div><strong>Nota:</strong> {{ feedback.nota }}★</div>
+                                <div><strong>Sabor:</strong> {{ feedback.sabor }}/5</div>
+                                <div><strong>Temperatura:</strong> {{ feedback.temperatura }}/5</div>
+                                <div><strong>Quantidade:</strong> {{ feedback.quantidade }}/5</div>
+                                <div><strong>Variedade:</strong> {{ feedback.variedade }}/5</div>
+                                <div class="feedback-comment"><strong>Comentário:</strong> {{ feedback.comentario|default:"Sem comentário" }}</div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="analysis-empty">Nenhum comentário encontrado.</p>
+                    {% endfor %}
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+{% endblock %}

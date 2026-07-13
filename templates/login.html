@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Login - IFEED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'estilos/login.css' %}">{% endblock %}
+{% block content %}
+<main>
+    <section class="login-section">
+        <div class="login-left">
+            <img src="{% static 'img/logograndesf.png' %}" alt="IFEED">
+            <h2>Bem-vindo ao IFEED</h2>
+            <p>
+                Faça login para acompanhar informações da alimentação estudantil,
+                acessar o cardápio e enviar feedbacks sobre as refeições.
+            </p>
+            <div class="login-info-cards">
+                <div class="mini-card"><span>📋</span><p>Veja o cardápio diário</p></div>
+                <div class="mini-card"><span>⭐</span><p>Avalie as refeições</p></div>
+                <div class="mini-card"><span>📢</span><p>Acompanhe avisos do campus</p></div>
+            </div>
+        </div>
+
+        <div class="login-container">
+            <div class="login-box">
+                <img src="{% static 'img/logomenorsf.png' %}" alt="Logo IFEED" class="login-logo">
+                <h2>Login</h2>
+                <p>Acesse sua conta institucional</p>
+
+                <form method="post" autocomplete="on">
+                    {% csrf_token %}
+                    {% if form.non_field_errors %}
+                        <div class="form-message error">{{ form.non_field_errors }}</div>
+                    {% endif %}
+
+                    <div class="input-group">
+                        <label for="id_username">Matrícula ou E-mail</label>
+                        <input type="text" id="id_username" name="username" placeholder="Digite sua matrícula ou e-mail" required autocomplete="username" value="{{ form.username.value|default:'' }}">
+                        {{ form.username.errors }}
+                    </div>
+
+                    <div class="input-group">
+                        <label for="id_password">Senha</label>
+                        <input type="password" id="id_password" name="password" placeholder="Digite sua senha" required autocomplete="current-password">
+                        {{ form.password.errors }}
+                    </div>
+
+                    <button type="submit" class="login-button">Entrar</button>
+                </form>
+
+                <div class="login-links">
+                    <a href="{% url 'usuarios:recuperar_senha' %}">Esqueci minha senha</a>
+                    <a href="{% url 'usuarios:cadastro_publico' %}">Não possui cadastro? Faça aqui!</a>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

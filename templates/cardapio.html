@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Cardápio - IFEED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'estilos/dashboard.css' %}">{% endblock %}
+{% block body_attrs %}data-private="true"{% endblock %}
+{% block content %}
+<main>
+    <section class="cardapio" aria-labelledby="cardapio-title">
+        <div class="container">
+            <h2 id="cardapio-title">Cardápio do Dia</h2>
+            <p class="section-description">
+                Consulte as refeições publicadas pelo administrador. Escolha uma refeição para enviar seu feedback.
+            </p>
+
+            <div class="cardapio-actions">
+                <a href="{% url 'dashboard' %}" class="btn-secondary">Voltar ao Dashboard</a>
+                {% if request.user.tipo_usuario == 'ALUNO' %}
+                    <a href="{% url 'feedbacks:avaliar' %}" class="btn-primary">Avaliar Refeição</a>
+                {% endif %}
+            </div>
+
+            <form method="get" class="meal-filters-card">
+                <div class="filter-group">
+                    <label for="mealTypeFilter">Tipo</label>
+                    <select id="mealTypeFilter" name="tipo">
+                        <option value="todos" {% if tipo_atual == 'todos' %}selected{% endif %}>Todos</option>
+                        <option value="A" {% if tipo_atual == 'A' %}selected{% endif %}>Almoço</option>
+                        <option value="J" {% if tipo_atual == 'J' %}selected{% endif %}>Jantar</option>
+                        <option value="L" {% if tipo_atual == 'L' %}selected{% endif %}>Lanche</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="mealDateFilter">Período</label>
+                    <select id="mealDateFilter" name="periodo">
+                        <option value="todos" {% if periodo_atual == 'todos' %}selected{% endif %}>Todas as refeições</option>
+                        <option value="hoje" {% if periodo_atual == 'hoje' %}selected{% endif %}>Somente hoje</option>
+                        <option value="semana" {% if periodo_atual == 'semana' %}selected{% endif %}>Próximos 7 dias</option>
+                    </select>
+                </div>
+
+                <div class="filter-group filter-summary">
+                    <button type="submit" class="btn-secondary">Filtrar</button>
+                </div>
+            </form>
+
+            <div id="publishedMealsList" class="menu-grid dynamic-menu-grid">
+                {% for refeicao in refeicoes %}
+                    <article class="menu-item published-meal-card">
+                        <div class="meal-card-topline">
+                            <span class="meal-badge">{{ refeicao.get_tipo_display }}</span>
+                            <span class="meal-date-badge">📅 {{ refeicao.data_refeicao|date:"d/m/Y" }}</span>
+                        </div>
+
+                        <h3>{% if refeicao.tipo == 'J' %}🌙{% else %}🍽️{% endif %} {{ refeicao.get_tipo_display }}</h3>
+                        <p class="meal-time">🕒 {{ refeicao.horario_inicio|time:"H:i" }} às {{ refeicao.horario_fim|time:"H:i" }}</p>
+
+                        <ul>
+                            {% for item in refeicao.itens.all %}
+                                <li>{{ item.get_tipo_item_display }}: {{ item.nome }}</li>
+                            {% empty %}
+                                <li>Cardápio sem itens detalhados.</li>
+                            {% endfor %}
+                        </ul>
+
+                        {% if refeicao.observacoes %}
+                            <p class="meal-observation"><strong>Observação:</strong> {{ refeicao.observacoes }}</p>
+                        {% endif %}
+
+                        <div class="item-buttons">
+                            <a class="btn-secondary meal-feedback-link" href="{% url 'refeicoes:detalhe' refeicao.pk %}">Ver detalhes</a>
+                            {% if request.user.tipo_usuario == 'ALUNO' %}
+                                <a class="btn-primary meal-feedback-link" href="{% url 'feedbacks:avaliar' %}?refeicao={{ refeicao.pk }}">Avaliar esta refeição</a>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% empty %}
+                    <article class="menu-item empty-menu-item">
+                        <h3>🍽️ Nenhuma refeição encontrada</h3>
+                        <p>Não existem refeições publicadas com os filtros selecionados.</p>
+                    </article>
+                {% endfor %}
+            </div>
+
+            <section class="avisos" aria-labelledby="em-breve-title">
+                <h2 id="em-breve-title">Em breve</h2>
+                <div class="avisos-container">
+                    <div class="aviso-box">
+                        <h3>Semana completa</h3>
+                        <p>Vamos apresentar o cardápio de toda a semana em breve, para você planejar suas refeições com antecedência.</p>
+                    </div>
+                    <div class="aviso-box">
+                        <h3>Filtros ativos</h3>
+                        <p>Agora você já pode filtrar por tipo de refeição e período para encontrar mais rápido o cardápio desejado.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </section>
+</main>
+{% endblock %}

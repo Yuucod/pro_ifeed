@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Alterar Senha - IFEED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'estilos/perfil.css' %}">{% endblock %}
+{% block content %}
+<main class="profile-page">
+    <section class="profile-hero-card">
+        <div class="profile-identity">
+            <div class="profile-avatar">🔐</div>
+            <div>
+                <span class="profile-role-badge">Segurança</span>
+                <h1>Alterar senha</h1>
+                <p>Atualize sua senha de acesso ao IFEED.</p>
+            </div>
+        </div>
+        <div class="profile-hero-actions">
+            <a href="{% url 'usuarios:perfil' %}" class="btn-profile-secondary">Voltar ao perfil</a>
+        </div>
+    </section>
+
+    <section class="profile-layout">
+        <article class="profile-panel personal-panel">
+            <div class="panel-title"><h2>Nova senha</h2></div>
+            <form method="post" class="inline-form">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="profile-message error">{{ form.non_field_errors }}</div>{% endif %}
+                <div class="form-grid single-column">
+                    <label class="form-field">
+                        <span>Senha atual</span>
+                        <input type="password" name="old_password" autocomplete="current-password" required>
+                        {{ form.old_password.errors }}
+                    </label>
+                    <label class="form-field">
+                        <span>Nova senha</span>
+                        <input type="password" name="new_password1" autocomplete="new-password" required>
+                        {{ form.new_password1.errors }}
+                    </label>
+                    <label class="form-field">
+                        <span>Confirmar nova senha</span>
+                        <input type="password" name="new_password2" autocomplete="new-password" required>
+                        {{ form.new_password2.errors }}
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-profile-primary">Salvar senha</button>
+                    <a href="{% url 'usuarios:perfil' %}" class="btn-profile-secondary">Cancelar</a>
+                </div>
+            </form>
+        </article>
+    </section>
+</main>
+{% endblock %}

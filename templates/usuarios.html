@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Usuários - IFEED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'estilos/usuarios.css' %}">{% endblock %}
+{% block body_attrs %}data-private="true" data-requires="administrador"{% endblock %}
+{% block content %}
+<main class="users-page">
+    <section class="users-hero">
+        <div>
+            <span class="users-tag">Área administrativa</span>
+            <h1>Gerenciamento de Usuários</h1>
+            <p>Cadastre, edite, desative ou remova usuários do sistema IFEED.</p>
+        </div>
+        <a href="{% url 'dashboard' %}" class="btn-secondary">Voltar ao Dashboard</a>
+    </section>
+
+    <section class="users-summary" aria-label="Resumo de usuários">
+        <article><span>👥</span><strong id="totalUsers">{{ resumo.total }}</strong><p>Total de usuários</p></article>
+        <article><span>🎓</span><strong id="totalStudents">{{ resumo.alunos }}</strong><p>Alunos</p></article>
+        <article><span>🛠️</span><strong id="totalAdmins">{{ resumo.admins }}</strong><p>Administradores</p></article>
+        <article><span>✅</span><strong id="totalActive">{{ resumo.ativos }}</strong><p>Contas ativas</p></article>
+    </section>
+
+    <section class="users-layout">
+        <aside class="user-form-card">
+            <div class="form-card-header">
+                <h2 id="userFormTitle">Novo usuário</h2>
+                <p>Cadastre usuários diretamente no banco do Django.</p>
+            </div>
+
+            <form id="userForm" method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}<div class="users-message error">{{ form.non_field_errors }}</div>{% endif %}
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label for="id_nome">Nome completo</label>
+                        <input type="text" id="id_nome" name="nome" required value="{{ form.nome.value|default:'' }}">
+                        {{ form.nome.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_email">E-mail</label>
+                        <input type="email" id="id_email" name="email" required value="{{ form.email.value|default:'' }}">
+                        {{ form.email.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_matricula">Matrícula</label>
+                        <input type="text" id="id_matricula" name="matricula" required value="{{ form.matricula.value|default:'' }}">
+                        {{ form.matricula.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_curso">Curso/Setor</label>
+                        <input type="text" id="id_curso" name="curso" value="{{ form.curso.value|default:'' }}">
+                        {{ form.curso.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_cargo">Cargo</label>
+                        <input type="text" id="id_cargo" name="cargo" placeholder="Opcional para admin" value="{{ form.cargo.value|default:'' }}">
+                        {{ form.cargo.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_tipo_usuario">Tipo</label>
+                        <select id="id_tipo_usuario" name="tipo_usuario" required>
+                            <option value="ALUNO">Aluno</option>
+                            <option value="ADMIN">Administrador</option>
+                        </select>
+                        {{ form.tipo_usuario.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_is_active">Status</label>
+                        <select id="id_is_active" name="is_active" required>
+                            <option value="on">Ativo</option>
+                            <option value="">Inativo</option>
+                        </select>
+                        {{ form.is_active.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password1">Senha</label>
+                        <input type="password" id="id_password1" name="password1" required placeholder="Mínimo de 8 caracteres">
+                        {{ form.password1.errors }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_password2">Confirmar senha</label>
+                        <input type="password" id="id_password2" name="password2" required placeholder="Repita a senha">
+                        {{ form.password2.errors }}
+                    </div>
+                </div>
+
+                <div class="user-form-actions">
+                    <a href="{% url 'usuarios:listar' %}" class="btn-secondary">Limpar</a>
+                    <button type="submit" class="btn-primary">Salvar usuário</button>
+                </div>
+                <div id="usersMessage" class="users-message" aria-live="polite"></div>
+            </form>
+        </aside>
+
+        <section class="users-list-card">
+            <div class="list-header">
+                <h2>Usuários cadastrados</h2>
+                <form method="get" class="users-search">
+                    <input type="search" id="userSearchInput" name="q" value="{{ busca }}" placeholder="Buscar por nome, e-mail ou matrícula">
+                    <button type="submit" class="btn-secondary">Buscar</button>
+                </form>
+            </div>
+
+            <div id="usersTable" class="users-table">
+                {% for usuario in usuarios %}
+                    <div class="user-row">
+                        <div class="user-main">
+                            <strong>{{ usuario.nome }}</strong>
+                            <span>{{ usuario.email }}</span>
+                            <small>{{ usuario.matricula|default:"Sem matrícula" }}</small>
+                        </div>
+                        <div class="user-badges">
+                            <span class="user-badge">{{ usuario.get_tipo_usuario_display }}</span>
+                            <span class="user-badge {% if not usuario.is_active %}inactive{% endif %}">{% if usuario.is_active %}Ativo{% else %}Inativo{% endif %}</span>
+                        </div>
+                        <div class="user-actions">
+                            <a href="{% url 'usuarios:editar' usuario.pk %}" class="btn-secondary">Editar</a>
+                            {% if usuario != request.user %}
+                                <a href="{% url 'usuarios:alternar_status' usuario.pk %}" class="btn-secondary">Ativar/Desativar</a>
+                                <form method="post" action="{% url 'usuarios:excluir' usuario.pk %}" onsubmit="return confirm('Excluir usuário?')">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-danger">Excluir</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="users-empty">Nenhum usuário encontrado.</div>
+                {% endfor %}
+            </div>
+        </section>
+    </section>
+</main>
+{% endblock %}
